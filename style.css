@@ -1,0 +1,65 @@
+* {
+	margin: 0;
+	padding: 0;
+}
+
+body {
+	background: black;
+	color: white;
+	font-family: monospace;
+	text-align: center;
+}
+
+h1, h2 {
+	position: absolute;
+	top: 2em;
+	width: 100%;
+}
+
+h2 {
+	top: 5em;
+}
+
+#wrapper {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: 1024px;
+	height: 768px;
+	margin: -384px -512px;
+}
+
+#board, #overlay {
+	position: absolute;
+	top: 128px;
+	height: 512px;
+	width: 1024px;
+}
+
+#overlay {
+	background: url('led.png');
+	pointer-events: none;
+}
+
+.led {
+	height: 48px;
+	width: 48px;
+	float: left;
+	margin: 8px;
+}
+
+#help {
+	position: absolute;
+	bottom: 0;
+	height: 8em;
+	width: 100%;
+	font-size: 14px;
+}
+
+#help > div {
+	float: left;
+	height: 100%;
+	width: 224px;
+	padding: 0 16px 0 16px;
+}
+
