@@ -61,11 +61,11 @@ function LEDBoard(parent,cols,rows,onbar){
 		// flip wavemaps
 		current = 1-current;
 		for( i = 0; i < leds.length; i++ ){
-			var l = Math.max(
+			var l = Math.min(
 				Math.round(
 					(leds[i].src += (leds[i].dst-leds[i].src)*0.5)
-					* 200 + 25 ),
-				Math.round(leds[i].wave)
+					* -100 + 240 ),
+				Math.round(255 + leds[i].wave)
 					);
 			//var l = Math.round( leds[i].wave );
 			leds[i].style.background = "rgb("+l+","+l+","+l+")";

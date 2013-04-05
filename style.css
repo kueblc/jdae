@@ -4,8 +4,7 @@
 }
 
 body {
-	background: black;
-	color: white;
+	color: gray;
 	font-family: monospace;
 	text-align: center;
 }
@@ -29,16 +28,11 @@ h2 {
 	margin: -384px -512px;
 }
 
-#board, #overlay {
+#board {
 	position: absolute;
 	top: 128px;
 	height: 512px;
 	width: 1024px;
-}
-
-#overlay {
-	background: url('led.png');
-	pointer-events: none;
 }
 
 .led {
