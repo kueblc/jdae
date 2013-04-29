@@ -78,12 +78,24 @@ function LED( x, y, callback ){
 };
 
 function LEDBoard( parent, cols, rows, onbar ){
+	// set up PS
+	var ps = PS( 'default', // XXX roomId
+		function onconnect(){ },
+		function onreceive( data ){
+			// modify led board state
+			var led = leds[ data.i ];
+			led.set( data.v );
+			wavemap.set( led.x, led.y, 1 );
+		},
+		function ondisconnect(){
+			alert( "DISCONNECTED!\nReload to attempt reconnect" );
+		} );
+	
 	// setup the wavemap
 	var wavemap = new Wavemap( cols, rows );
 	
 	var ledCb = function( led ){
-		led.set( 1 - led.dst );
-		wavemap.set( led.x, led.y, 1 );
+		ps.send( { i: led.index, v: 1 - led.dst } );
 	};
 	
 	// generate the board

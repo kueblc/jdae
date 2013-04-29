@@ -1,6 +1,6 @@
 // jdae.js
 // javascript dynamic audio engine
-// (c) 2011 colin kuebler
+// (c) 2011 - 2013 colin kuebler
 
 function $(e){ return document.getElementById(e); };
 
