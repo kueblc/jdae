@@ -2,22 +2,10 @@
 // part of led experiment
 // (c) 2011 colin kuebler
 
-function LEDBoard(parent,cols,rows,onbar){
-	// generate the board
-	var spans = "";
-	for( var i = 0; i < rows*cols; i++ ){
-		spans += "<div class='led'></div>";
-	}
-	parent.innerHTML = spans;
-	var leds = parent.getElementsByTagName("div");
-	// setup led properties
-	for( var i = 0; i < leds.length; i++ ){
-		leds[i].src = 0;
-		leds[i].dst = 0;
-		leds[i].wave = 0;
-		leds[i].onmousedown = function(){ this.dst = 1-this.dst; this.wave = 255; };
-		leds[i].onmouseover = function(){ this.src = 1; };
-	}
+function Wavemap( cols, rows, dampen ){
+	var self = this;
+	dampen = dampen || (15.0/16.0)
+	
 	// setup wavemap
 	var wavemap = new Array(2);
 	var current = 0;
@@ -30,18 +18,8 @@ function LEDBoard(parent,cols,rows,onbar){
 			}
 		}
 	}
-	// animation tick
-	this.animate = function(){
-		// update wavemap
-		var i = 0;
-		for( var j = 1; j < rows+1; j++ ){
-			for( var k = 1; k < cols+1; k++ ){
-				// import recent changes
-				wavemap[current][j][k] = leds[i].wave;
-				i++;
-			}
-		}
-		i = 0;
+	
+	self.step = function(){
 		for( var j = 1; j < rows+1; j++ ){
 			for( var k = 1; k < cols+1; k++ ){
 				// wave dynamics
@@ -52,27 +30,87 @@ function LEDBoard(parent,cols,rows,onbar){
 						wavemap[current][j][k+1] ) / 2.0
 					- wavemap[1-current][j][k];
 				// dampen
-				wavemap[1-current][j][k] *= (15.0/16.0);
-				// inform led of update
-				leds[i].wave = wavemap[1-current][j][k];
-				i++;
+				wavemap[1-current][j][k] *= dampen;
 			}
 		}
 		// flip wavemaps
 		current = 1-current;
+	};
+	
+	self.get = function( k, j ){
+		return wavemap[current][j+1][k+1];
+	};
+	
+	self.set = function( k, j, v ){
+		wavemap[current][j+1][k+1] = v;
+	};
+	
+	return self;
+};
+
+var LED_ID = 0;
+function LED( x, y, callback ){
+	var self = document.createElement('div');
+	self.className = 'led';
+	
+	self.src = 0;
+	self.dst = 0;
+	self.x = x; self.y = y;
+	self.index = LED_ID++;
+	
+	self.set = function( value ){
+		self.dst = value;
+	};
+	
+	self.onmousedown = function(){
+		callback( self );
+	};
+	
+	self.onmouseover = function(){
+		self.src = 1;
+	};
+	
+	self.step = function(){
+		self.src += (self.dst-self.src) * 0.5;
+	};
+	
+	return self;
+};
+
+function LEDBoard( parent, cols, rows, onbar ){
+	// setup the wavemap
+	var wavemap = new Wavemap( cols, rows );
+	
+	var ledCb = function( led ){
+		led.set( 1 - led.dst );
+		wavemap.set( led.x, led.y, 1 );
+	};
+	
+	// generate the board
+	var leds = [];
+	for( var y = 0, i = 0; y < rows; y++ ){
+		for( var x = 0; x < cols; x++, i++ ){
+			var led = new LED( x, y, ledCb );
+			leds.push( led );
+			parent.appendChild( led );
+		}
+	}
+	
+	// animation tick
+	this.step = function(){
+		wavemap.step();
 		for( i = 0; i < leds.length; i++ ){
-			var l = Math.min(
-				Math.round(
-					(leds[i].src += (leds[i].dst-leds[i].src)*0.5)
-					* -100 + 240 ),
-				Math.round(255 + leds[i].wave)
-					);
-			//var l = Math.round( leds[i].wave );
-			leds[i].style.background = "rgb("+l+","+l+","+l+")";
+			var led = leds[i];
+			led.step();
+			led.style.opacity = 0.2 + Math.max(
+				led.src,
+				wavemap.get( led.x, led.y )
+			);
 		}
 	};
+	
 	// start animating
-	setInterval(this.animate,100);
+	setInterval(this.step,100);
 	// scrolling bar
 	var bar_pos = -1;
 	var playtimer;
